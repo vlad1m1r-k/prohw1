@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.Map;
 
 @WebServlet(urlPatterns = "/anketa")
 public class Anketa extends HttpServlet {
@@ -21,18 +21,10 @@ public class Anketa extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         responders.addResponder(new Responder(req.getParameter("firstname"), req.getParameter("lastname"), Integer.valueOf(req.getParameter("age")),
                 Responder.Response.valueOf(req.getParameter("question1")), Responder.Response.valueOf(req.getParameter("question2"))));
-        resp.setCharacterEncoding("UTF-8");
-        resp.setContentType("text/html");
-        PrintWriter writer = resp.getWriter();
-        writer.println("<html lang=\"ru\">");
-        writer.println("<head>");
-        writer.println("<meta contentType=\"text/html\"; charset=\"UTF-8\">");
-        writer.println("<title>Статистика опрошенных</title>");
-        writer.println("</head>");
-        writer.println("<body>");
-        writer.println("<h2>Статистика опрошенных</h2><br>");
-        writer.println(responders.getStatistics());
-        writer.println("</body>");
-        writer.println("</html>");
+        Map<String, Integer> statistics = responders.getStatistics();
+        for (Map.Entry<String, Integer> entry : statistics.entrySet()) {
+            req.setAttribute(entry.getKey(), entry.getValue());
+        }
+        req.getRequestDispatcher("statistics.jsp").forward(req, resp);
     }
 }
